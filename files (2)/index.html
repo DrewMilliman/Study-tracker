@@ -1,0 +1,1540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Study tracker</title>
+<meta name="description" content="Personal study tracker for CCNA, Security+, and AWS Security path.">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#FAFAF7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1A1916" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Tracker">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
+<style>
+:root {
+  --bg: #FAFAF7;
+  --surface: #FFFFFF;
+  --border: rgba(0,0,0,0.08);
+  --border-strong: rgba(0,0,0,0.18);
+  --text: #1A1A1A;
+  --text-muted: #6B6B6B;
+  --text-faint: #A8A8A8;
+  --accent: #3C3489;
+  --ccna: #EEEDFE; --ccna-fg: #3C3489;
+  --cab: #FAECE7; --cab-fg: #712B13;
+  --sec: #FBEAF0; --sec-fg: #72243E;
+  --aws: #FFF4E0; --aws-fg: #6B4513;
+  --job: #E8F0FA; --job-fg: #1A4480;
+  --game: #F1EFE8; --game-fg: #444441;
+  --success: #639922;
+  --warning: #BA7517;
+  --danger: #A32D2D;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1A1916;
+    --surface: #232220;
+    --border: rgba(255,255,255,0.07);
+    --border-strong: rgba(255,255,255,0.18);
+    --text: #F5F4EF;
+    --text-muted: #A8A7A2;
+    --text-faint: #6B6A66;
+    --accent: #AFA9EC;
+    --ccna: #3C3489; --ccna-fg: #CECBF6;
+    --cab: #712B13; --cab-fg: #F5C4B3;
+    --sec: #72243E; --sec-fg: #F4C0D1;
+    --aws: #6B4513; --aws-fg: #FFD89C;
+    --job: #1A4480; --job-fg: #B8D0EE;
+    --game: #444441; --game-fg: #D3D1C7;
+    --success: #97C459;
+    --warning: #EF9F27;
+    --danger: #E24B4A;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+h1, h2, .serif { font-family: ui-serif, Georgia, 'Iowan Old Style', serif; font-weight: 500; }
+.app { max-width: 880px; margin: 0 auto; padding: 0 24px 60px; }
+
+header {
+  position: sticky; top: 0;
+  background: var(--bg);
+  border-bottom: 0.5px solid var(--border);
+  z-index: 10;
+  padding: 18px 0 14px;
+  margin-bottom: 22px;
+}
+.brand-row { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
+.brand { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.brand h1 { font-size: 24px; letter-spacing: -0.015em; }
+.brand .sub {
+  font-size: 11px; color: var(--text-muted);
+  font-family: ui-monospace, monospace;
+  text-transform: uppercase; letter-spacing: 0.1em;
+}
+.nav { display: flex; align-items: center; gap: 6px; }
+.btn {
+  background: var(--surface);
+  border: 0.5px solid var(--border-strong);
+  color: var(--text);
+  padding: 7px 13px;
+  border-radius: 7px;
+  font-size: 13px; font-weight: 500;
+  cursor: pointer; font-family: inherit;
+  transition: background 0.12s;
+}
+.btn:hover { background: var(--border); }
+
+.exam-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+  font-size: 12px;
+  font-family: ui-monospace, monospace;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+.exam-countdown { display: flex; align-items: center; gap: 8px; }
+.exam-countdown strong { color: var(--accent); font-weight: 600; }
+.exam-countdown.passed strong { color: var(--success); }
+.exam-countdown.urgent strong { color: var(--warning); }
+.text-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: var(--border-strong);
+  text-underline-offset: 3px;
+  padding: 0;
+}
+.text-btn:hover { color: var(--accent); text-decoration-color: var(--accent); }
+
+.search-row { margin-top: 8px; }
+.search-input {
+  width: 100%;
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 7px;
+  padding: 7px 12px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+}
+.search-input:focus { outline: none; border-color: var(--accent); }
+
+.search-results {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 18px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+.search-result {
+  padding: 10px 16px;
+  border-bottom: 0.5px solid var(--border);
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.search-result:last-child { border-bottom: none; }
+.search-result:hover { background: var(--border); }
+.search-result-date {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-family: ui-monospace, monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 3px;
+}
+.search-result-excerpt { font-size: 13px; color: var(--text); line-height: 1.4; }
+.search-result-excerpt mark { background: var(--ccna); color: var(--ccna-fg); padding: 0 2px; border-radius: 2px; }
+.search-empty { padding: 14px 16px; font-size: 12px; color: var(--text-muted); font-style: italic; text-align: center; }
+
+.week-display {
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: center;
+  margin-top: 8px;
+  letter-spacing: 0.02em;
+}
+
+.rule-banner {
+  border: 0.5px dashed var(--border-strong);
+  border-radius: 8px;
+  padding: 11px 16px;
+  margin-bottom: 18px;
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: center;
+  font-style: italic;
+  font-family: ui-serif, Georgia, serif;
+}
+.rule-banner strong { color: var(--text); font-style: normal; font-weight: 500; }
+
+.phase-banner {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.phase-name { font-weight: 500; font-size: 14px; }
+.phase-focus { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.phase-dates {
+  font-size: 11px; color: var(--text-muted);
+  font-family: ui-monospace, monospace;
+  letter-spacing: 0.04em;
+  text-align: right;
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.stat {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 10px;
+  padding: 13px 16px;
+}
+.stat-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 4px;
+  font-family: ui-monospace, monospace;
+}
+.stat-value {
+  font-size: 22px; font-weight: 500;
+  font-family: ui-serif, Georgia, serif;
+}
+.stat-unit { font-size: 11px; color: var(--text-faint); margin-left: 3px; font-family: ui-sans-serif, system-ui, sans-serif; }
+
+.freshness {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 24px;
+}
+.freshness-header {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 10px;
+  font-family: ui-monospace, monospace;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.freshness-header .hint { text-transform: none; letter-spacing: 0; font-style: italic; color: var(--text-faint); }
+.freshness-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px 14px;
+}
+.fresh-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 13px;
+  padding: 4px 0;
+  border-bottom: 0.5px solid var(--border);
+}
+.fresh-item:nth-last-child(-n+2) { border-bottom: none; }
+.fresh-name { color: var(--text); }
+.fresh-age {
+  font-family: ui-monospace, monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+.fresh-age.stale { color: var(--warning); font-weight: 600; }
+.fresh-age.never { color: var(--text-faint); }
+
+.skills {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 24px;
+}
+.skills-header {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 12px;
+  font-family: ui-monospace, monospace;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.skills-header .hint { text-transform: none; letter-spacing: 0; font-style: italic; color: var(--text-faint); }
+.skill-item {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 10px 16px;
+  padding: 8px 0;
+  border-bottom: 0.5px solid var(--border);
+  transition: opacity 0.2s;
+}
+.skill-item:last-child { border-bottom: none; }
+.skill-item.done { opacity: 0.4; }
+.skill-name { font-size: 13px; color: var(--text); }
+.skill-name .skill-num {
+  font-family: ui-monospace, monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-right: 7px;
+}
+.skill-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-family: ui-monospace, monospace;
+  white-space: nowrap;
+}
+.skill-check.placeholder { visibility: hidden; }
+.skill-check input[type="checkbox"] {
+  appearance: none;
+  width: 16px; height: 16px;
+  border: 1.5px solid var(--border-strong);
+  border-radius: 4px;
+  cursor: pointer;
+  flex-shrink: 0;
+  background: var(--bg);
+  position: relative;
+  transition: all 0.12s;
+}
+.skill-check input[type="checkbox"]:hover { border-color: var(--accent); }
+.skill-check input[type="checkbox"]:checked { background: var(--accent); border-color: var(--accent); }
+.skill-check input[type="checkbox"]:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--bg);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+@media (max-width: 720px) {
+  .skill-item { grid-template-columns: 1fr; gap: 6px; }
+  .skill-check { justify-content: flex-start; }
+  .skill-check.placeholder { display: none; }
+}
+
+.days { display: flex; flex-direction: column; gap: 10px; }
+.day {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: border 0.2s;
+}
+.day.today { border: 1.5px solid var(--accent); }
+.day.complete { border-color: var(--success); border-width: 1px; }
+
+.day-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 13px 18px;
+  border-bottom: 0.5px solid var(--border);
+}
+.day-title { display: flex; align-items: baseline; gap: 12px; }
+.day-name { font-family: ui-serif, Georgia, serif; font-size: 17px; font-weight: 500; }
+.day-date { font-family: ui-monospace, monospace; font-size: 11px; color: var(--text-muted); letter-spacing: 0.04em; }
+.today-pill {
+  font-size: 10px;
+  background: var(--accent);
+  color: var(--bg);
+  padding: 2px 7px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-left: 6px;
+  font-family: ui-monospace, monospace;
+  font-weight: 500;
+}
+.day-status {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: ui-monospace, monospace;
+  letter-spacing: 0.04em;
+}
+.day-status.complete { color: var(--success); }
+.day-body { padding: 12px 18px 16px; }
+
+.retrieval-quiz {
+  background: var(--ccna);
+  border-radius: 6px;
+  padding: 9px 12px;
+  margin-bottom: 10px;
+}
+.retrieval-quiz-label {
+  font-size: 9px;
+  color: var(--ccna-fg);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-family: ui-monospace, monospace;
+  font-weight: 600;
+  margin-bottom: 3px;
+}
+.retrieval-quiz-text {
+  font-size: 13px;
+  color: var(--ccna-fg);
+  font-family: ui-serif, Georgia, serif;
+  font-style: italic;
+}
+
+.task-list { list-style: none; }
+.task {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 0.5px solid var(--border);
+}
+.task:last-child { border-bottom: none; }
+.task input[type="checkbox"] {
+  appearance: none;
+  width: 18px; height: 18px;
+  border: 1.5px solid var(--border-strong);
+  border-radius: 4px;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-top: 1px;
+  background: var(--bg);
+  position: relative;
+  transition: all 0.12s;
+}
+.task input[type="checkbox"]:hover { border-color: var(--accent); }
+.task input[type="checkbox"]:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.task input[type="checkbox"]:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--bg);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+}
+.task-label {
+  flex: 1;
+  cursor: pointer;
+  user-select: none;
+  font-size: 14px;
+}
+.task input:checked + .task-label {
+  color: var(--text-muted);
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+.tag {
+  font-size: 9px;
+  font-weight: 600;
+  padding: 3px 7px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-family: ui-monospace, monospace;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.tag-ccna { background: var(--ccna); color: var(--ccna-fg); }
+.tag-cab { background: var(--cab); color: var(--cab-fg); }
+.tag-sec { background: var(--sec); color: var(--sec-fg); }
+.tag-aws { background: var(--aws); color: var(--aws-fg); }
+.tag-job { background: var(--job); color: var(--job-fg); }
+.tag-rule { background: var(--game); color: var(--game-fg); }
+
+.domain-select-row {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 0.5px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.domain-select-row .field-label { margin-bottom: 0; flex-shrink: 0; }
+.domain-select {
+  flex: 1;
+  min-width: 180px;
+  background: var(--bg);
+  border: 0.5px solid var(--border-strong);
+  border-radius: 6px;
+  padding: 6px 10px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.domain-select:focus { outline: none; border-color: var(--accent); }
+
+.extras {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  gap: 16px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 0.5px solid var(--border);
+}
+.field-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+  display: block;
+  font-family: ui-monospace, monospace;
+}
+.gaming-control { display: flex; align-items: center; gap: 6px; }
+.gaming-btn {
+  width: 26px; height: 26px;
+  border-radius: 6px;
+  border: 0.5px solid var(--border-strong);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 15px;
+  cursor: pointer;
+  font-family: inherit;
+  line-height: 1;
+}
+.gaming-btn:hover { background: var(--border); }
+.gaming-display {
+  font-family: ui-monospace, monospace;
+  font-size: 13px;
+  font-weight: 500;
+  min-width: 48px;
+  text-align: center;
+}
+.gaming-display.warn { color: var(--warning); }
+.notes-input {
+  width: 100%;
+  background: var(--bg);
+  border: 0.5px solid var(--border);
+  border-radius: 6px;
+  padding: 7px 10px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  resize: vertical;
+  min-height: 30px;
+  line-height: 1.4;
+}
+.notes-input:focus { outline: none; border-color: var(--accent); }
+
+.retrieval-prompt-row {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 0.5px solid var(--border);
+}
+.retrieval-prompt-input {
+  width: 100%;
+  background: var(--bg);
+  border: 0.5px solid var(--border);
+  border-radius: 6px;
+  padding: 7px 10px;
+  color: var(--text);
+  font-family: ui-serif, Georgia, serif;
+  font-style: italic;
+  font-size: 13px;
+}
+.retrieval-prompt-input:focus { outline: none; border-color: var(--accent); font-style: normal; }
+.retrieval-prompt-input::placeholder { color: var(--text-faint); font-style: italic; }
+
+footer {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 0.5px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 12px;
+  color: var(--text-muted);
+  font-family: ui-monospace, monospace;
+  flex-wrap: wrap;
+}
+.footer-actions { display: flex; gap: 10px; align-items: center; }
+.danger-btn {
+  background: transparent;
+  border: 0.5px solid var(--border-strong);
+  color: var(--text-muted);
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  cursor: pointer;
+  font-family: ui-monospace, monospace;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.danger-btn:hover { color: var(--danger); border-color: var(--danger); }
+
+dialog.modal {
+  border: 0.5px solid var(--border-strong);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  padding: 20px 22px;
+  max-width: 360px;
+  width: 90%;
+  font-family: inherit;
+}
+dialog.modal::backdrop { background: rgba(0,0,0,0.4); }
+dialog.modal h2 { font-size: 16px; margin-bottom: 10px; }
+dialog.modal p { font-size: 13px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.45; }
+dialog.modal input[type="date"] {
+  width: 100%;
+  padding: 8px 10px;
+  border: 0.5px solid var(--border-strong);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  margin-bottom: 14px;
+}
+dialog.modal .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+@media (max-width: 720px) {
+  .summary { grid-template-columns: repeat(2, 1fr); }
+  .freshness-grid { grid-template-columns: 1fr; }
+  .fresh-item:nth-last-child(-n+2) { border-bottom: 0.5px solid var(--border); }
+  .fresh-item:last-child { border-bottom: none; }
+  .extras { grid-template-columns: 1fr; }
+  .app { padding: 0 16px 50px; }
+  .brand h1 { font-size: 20px; }
+  .brand .sub { display: none; }
+  .phase-banner { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .phase-dates { text-align: left; }
+  footer { flex-direction: column; align-items: stretch; gap: 12px; }
+  .footer-actions { justify-content: space-between; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="brand-row">
+    <div class="brand">
+      <h1>Study tracker</h1>
+      <span class="sub">ccna · sec+ · aws</span>
+    </div>
+    <div class="nav">
+      <button class="btn" id="prev-week">← Prev</button>
+      <button class="btn" id="today-btn">Today</button>
+      <button class="btn" id="next-week">Next →</button>
+    </div>
+  </div>
+  <div class="exam-row">
+    <span class="exam-countdown" id="exam-countdown">—</span>
+    <button class="text-btn" id="set-exam-date">Set exam date</button>
+  </div>
+  <div class="search-row">
+    <input type="search" class="search-input" id="notes-search" placeholder="Search notes…" aria-label="Search notes">
+  </div>
+  <div class="week-display" id="week-display">—</div>
+</header>
+
+<div class="search-results" id="search-results" hidden></div>
+
+<div class="rule-banner">
+  The rule: <strong>study before gaming. every day.</strong>
+</div>
+
+<div class="phase-banner" id="phase-banner">
+  <div>
+    <div class="phase-name" id="phase-name">—</div>
+    <div class="phase-focus" id="phase-focus">—</div>
+  </div>
+  <div class="phase-dates" id="phase-dates">—</div>
+</div>
+
+<div class="summary">
+  <div class="stat">
+    <div class="stat-label">Tasks done</div>
+    <div class="stat-value" id="stat-tasks">0<span class="stat-unit">/wk</span></div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Gaming</div>
+    <div class="stat-value" id="stat-gaming">0<span class="stat-unit">hrs</span></div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Days hit</div>
+    <div class="stat-value" id="stat-days">0<span class="stat-unit">/7</span></div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Streak</div>
+    <div class="stat-value" id="stat-streak">0<span class="stat-unit">days</span></div>
+  </div>
+</div>
+
+<div class="freshness" id="freshness" hidden>
+  <div class="freshness-header">
+    <span>CCNA domain freshness</span>
+    <span class="hint">stale &gt; 10 days</span>
+  </div>
+  <div class="freshness-grid" id="freshness-grid"></div>
+</div>
+
+<div class="skills" id="skills">
+  <div class="skills-header">
+    <span>Skill review progress</span>
+    <span class="hint">rebuild a lab from blank · self-test from memory</span>
+  </div>
+  <div id="skills-list"></div>
+</div>
+
+<div class="days" id="days"></div>
+
+<footer>
+  <span id="storage-status">Saved locally.</span>
+  <div class="footer-actions">
+    <button class="text-btn" id="export-btn">Export JSON</button>
+    <button class="text-btn" id="import-btn">Import</button>
+    <button class="danger-btn" id="reset-week">Reset week</button>
+  </div>
+  <input type="file" id="import-file" accept="application/json,.json" hidden>
+</footer>
+</div>
+
+<dialog class="modal" id="exam-modal">
+  <h2 class="serif">Set CCNA exam date</h2>
+  <p>Your countdown anchors the rest of the tracker. Leave blank to clear.</p>
+  <input type="date" id="exam-date-input">
+  <div class="modal-actions">
+    <button class="btn" id="exam-cancel">Cancel</button>
+    <button class="btn" id="exam-clear">Clear</button>
+    <button class="btn" id="exam-save" style="border-color: var(--accent); color: var(--accent);">Save</button>
+  </div>
+</dialog>
+
+<script>
+// =========================================================================
+// Storage shim — localStorage with the same async API the app expected.
+// Backward-compatible with existing day:YYYY-MM-DD keys.
+// =========================================================================
+if (!window.storage) {
+  window.storage = {
+    async get(key) {
+      const v = localStorage.getItem(key);
+      return v !== null ? { key, value: v } : null;
+    },
+    async set(key, value) {
+      localStorage.setItem(key, value);
+      return { key, value };
+    },
+    async delete(key) {
+      localStorage.removeItem(key);
+      return { key, deleted: true };
+    },
+    async list(prefix) {
+      const keys = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (!prefix || (k && k.startsWith(prefix))) keys.push(k);
+      }
+      return { keys, prefix };
+    }
+  };
+}
+
+// Service worker — offline + installability.
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(err => {
+      console.log('Service worker registration failed:', err);
+    });
+  });
+}
+
+// =========================================================================
+// Constants
+// =========================================================================
+const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+// CCNA 200-301 v1.1 official domains. Source:
+// https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf
+const CCNA_DOMAINS = [
+  { id: '1', name: '1.0 Network Fundamentals', weight: '20%' },
+  { id: '2', name: '2.0 Network Access', weight: '20%' },
+  { id: '3', name: '3.0 IP Connectivity', weight: '25%' },
+  { id: '4', name: '4.0 IP Services', weight: '10%' },
+  { id: '5', name: '5.0 Security Fundamentals', weight: '15%' },
+  { id: '6', name: '6.0 Automation & Programmability', weight: '10%' }
+];
+const STALE_DAYS = 10;
+
+// CCNA skills from the user's Summer of CCNA study guide (NetworkChuck Academy).
+// Skill numbers and lab/no-lab flags are taken directly from the study-guide PDF
+// (lab flag = whether that skill has any "S##-L##" / Lab entry in the guide).
+// Labels are concise summaries of each skill's lessons.
+const CCNA_SKILLS = [
+  { id: '00', name: 'Networking basics & OSI/TCP-IP', lab: false },
+  { id: '01', name: 'Packet Tracer setup', lab: false },
+  { id: '02', name: 'Castle Rysen RFP & LAN/WAN concepts', lab: false },
+  { id: '03', name: 'Cabling & network standards', lab: false },
+  { id: '04', name: 'Network models & design architecture', lab: false },
+  { id: '05', name: 'Cisco IOS & base configuration', lab: true },
+  { id: '06', name: 'MAC addresses, frames & CAM tables', lab: true },
+  { id: '07', name: 'IP addressing & subnet masks', lab: false },
+  { id: '08', name: 'Switch & router interfaces', lab: true },
+  { id: '09', name: 'Routing: static, default & dynamic', lab: true },
+  { id: '10', name: 'NAT', lab: true },
+  { id: '11', name: 'Subnetting & VLSM', lab: false },
+  { id: '12', name: 'VLANs & trunking', lab: true },
+  { id: '13', name: 'Spanning Tree Protocol', lab: true },
+  { id: '14', name: 'EtherChannel', lab: true },
+  { id: '15', name: 'Routing protocols & OSPF', lab: true },
+  { id: '16', name: 'First Hop Redundancy (HSRP)', lab: true },
+  { id: '17', name: 'IPv6', lab: true },
+  { id: '18', name: 'ACLs', lab: true },
+  { id: '19', name: 'Security threats & Cisco AAA', lab: false },
+  { id: '20', name: 'Layer 2 security', lab: true },
+  { id: '21', name: 'CDP & LLDP', lab: true },
+  { id: '22', name: 'IP services (NTP, DNS, DHCP, SSH)', lab: true },
+  { id: '23', name: 'SNMP & Syslog', lab: true },
+  { id: '24', name: 'QoS', lab: true },
+  { id: '25', name: 'Wireless', lab: false },
+  { id: '26', name: 'Automation & SDN', lab: false }
+];
+
+// =========================================================================
+// Date helpers
+// =========================================================================
+function fmtDate(d) {
+  const y = d.getFullYear(), m = String(d.getMonth() + 1).padStart(2, '0'), dd = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${dd}`;
+}
+function parseDate(s) {
+  // Parses YYYY-MM-DD as local date (NOT UTC, to avoid timezone drift).
+  if (!s) return null;
+  const [y, m, d] = s.split('-').map(Number);
+  if (!y || !m || !d) return null;
+  return new Date(y, m - 1, d);
+}
+function getMonday(d) {
+  const day = d.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  const m = new Date(d); m.setDate(d.getDate() + diff); m.setHours(0,0,0,0);
+  return m;
+}
+function addDays(d, n) { const r = new Date(d); r.setDate(d.getDate() + n); return r; }
+function fmtRange(s, e) {
+  const o = { month: 'short', day: 'numeric' };
+  return `${s.toLocaleDateString('en-US', o)} – ${e.toLocaleDateString('en-US', o)}, ${s.getFullYear()}`;
+}
+function daysBetween(a, b) {
+  const ms = b.getTime() - a.getTime();
+  return Math.round(ms / 86400000);
+}
+
+// =========================================================================
+// Phases — hardcoded dates per user direction (no flexing around exam date).
+// =========================================================================
+function getPhase(d) {
+  const may21 = new Date(2026, 4, 21);
+  const jun1 = new Date(2026, 5, 1);
+  const sep1 = new Date(2026, 8, 1);
+  if (d < may21) return 1;
+  if (d < jun1) return 2;
+  if (d < sep1) return 3;
+  return 4;
+}
+
+const PHASES = {
+  1: { name: 'Phase 1 — CCNA catch-up', focus: "Today's CCNA assignment + one catch-up daily", dates: 'May 13 – May 20' },
+  2: { name: 'Phase 2 — Reset', focus: 'Build sustainable rhythm', dates: 'May 21 – May 31' },
+  3: { name: 'Phase 3 — CCNA push', focus: 'CCNA exam is the goal. Pass before year-end.', dates: 'June – August' },
+  4: { name: 'Phase 4 — Security+ + job hunt', focus: 'Security+ study + entry-level job applications', dates: 'September onward' }
+};
+
+function getTasks(d) {
+  const phase = getPhase(d);
+  const dow = d.getDay();
+
+  if (phase === 1) {
+    // Cabrillo finals done. Two CCNA blocks: today's assignment + one catch-up.
+    return [
+      { id: 'ccna-today', label: "Today's CCNA assignment", tag: 'CCNA', cls: 'tag-ccna', isCcnaStudy: true },
+      { id: 'ccna-catchup', label: 'CCNA catch-up assignment', tag: 'CCNA', cls: 'tag-ccna', isCcnaStudy: true },
+      { id: 'hard-stop', label: 'Hard stop by 11 PM', tag: 'Rule', cls: 'tag-rule' }
+    ];
+  }
+  if (phase === 2) {
+    if (dow === 0) return [
+      { id: 'review', label: 'Light review (1h max) or full day off', tag: 'CCNA', cls: 'tag-ccna' },
+      { id: 'hard-stop', label: 'Hard stop by 11 PM', tag: 'Rule', cls: 'tag-rule' }
+    ];
+    return [
+      { id: 'ccna-today', label: "Today's CCNA assignment (~2h)", tag: 'CCNA', cls: 'tag-ccna', isCcnaStudy: true },
+      { id: 'labs', label: 'CCNA labs / Packet Tracer (~1.5h)', tag: 'CCNA', cls: 'tag-ccna', isCcnaStudy: true },
+      { id: 'hard-stop', label: 'Hard stop by 11 PM', tag: 'Rule', cls: 'tag-rule' }
+    ];
+  }
+  if (phase === 3) {
+    if (dow === 0) return [
+      { id: 'review', label: 'Light review or full day off', tag: 'CCNA', cls: 'tag-ccna' },
+      { id: 'hard-stop', label: 'Hard stop by 11 PM', tag: 'Rule', cls: 'tag-rule' }
+    ];
+    if (dow === 6) return [
+      { id: 'practice', label: 'CCNA practice exam or major lab (~3h)', tag: 'CCNA', cls: 'tag-ccna', isCcnaStudy: true },
+      { id: 'hard-stop', label: 'Hard stop by 11 PM', tag: 'Rule', cls: 'tag-rule' }
+    ];
+    return [
+      { id: 'ccna-today', label: "Today's CCNA assignment (~2.5h)", tag: 'CCNA', cls: 'tag-ccna', isCcnaStudy: true },
+      { id: 'extra', label: 'CCNA labs or weak-area drill (~1.5h)', tag: 'CCNA', cls: 'tag-ccna', isCcnaStudy: true },
+      { id: 'hard-stop', label: 'Hard stop by 11 PM', tag: 'Rule', cls: 'tag-rule' }
+    ];
+  }
+  // Phase 4: Security+ primary, job hunt secondary.
+  if (dow === 0) return [
+    { id: 'rest', label: 'Day off — fully recharge', tag: 'Rule', cls: 'tag-rule' }
+  ];
+  return [
+    { id: 'secplus', label: 'Security+ study (~2h)', tag: 'Sec+', cls: 'tag-sec' },
+    { id: 'secplus-practice', label: 'Security+ practice questions or labs (~1h)', tag: 'Sec+', cls: 'tag-sec' },
+    { id: 'apps', label: 'Job application or LinkedIn outreach', tag: 'Jobs', cls: 'tag-job' },
+    { id: 'hard-stop', label: 'Hard stop by 11 PM', tag: 'Rule', cls: 'tag-rule' }
+  ];
+}
+
+// =========================================================================
+// Initial week (clamped to May 11, 2026 lower bound — preserved from original)
+// =========================================================================
+const today = new Date(); today.setHours(0,0,0,0);
+let currentWeekStart = getMonday(today);
+if (currentWeekStart < new Date(2026, 4, 11)) currentWeekStart = new Date(2026, 4, 11);
+
+// =========================================================================
+// Day storage — backward-compatible default shape
+// =========================================================================
+async function loadDay(dateStr) {
+  try {
+    const r = await window.storage.get(`day:${dateStr}`);
+    if (r && r.value) {
+      const parsed = JSON.parse(r.value);
+      // Ensure new fields exist with sensible defaults (old data is unchanged on disk).
+      return {
+        tasks: parsed.tasks || {},
+        gamingMinutes: parsed.gamingMinutes || 0,
+        notes: parsed.notes || '',
+        topics: Array.isArray(parsed.topics) ? parsed.topics : [],
+        retrievalPrompt: parsed.retrievalPrompt || ''
+      };
+    }
+  } catch (e) {}
+  return { tasks: {}, gamingMinutes: 0, notes: '', topics: [], retrievalPrompt: '' };
+}
+
+let saveTimer;
+function flashStatus(msg) {
+  const el = document.getElementById('storage-status');
+  el.textContent = msg;
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => { el.textContent = 'Saved locally.'; }, 1200);
+}
+
+async function saveDay(dateStr, data) {
+  try {
+    await window.storage.set(`day:${dateStr}`, JSON.stringify(data));
+    flashStatus('Saved ✓');
+  } catch (e) {
+    flashStatus('Save failed');
+    console.error(e);
+  }
+}
+
+function formatMinutes(m) {
+  if (m < 60) return `${m}m`;
+  const hrs = m / 60;
+  return Number.isInteger(hrs) ? `${hrs}h` : `${hrs.toFixed(1)}h`;
+}
+
+// =========================================================================
+// Streak — unchanged from original per user direction.
+// =========================================================================
+async function calcStreak() {
+  let streak = 0;
+  let d = new Date(today);
+  for (let i = 0; i < 90; i++) {
+    const data = await loadDay(fmtDate(d));
+    const tasks = getTasks(d).filter(t => t.id !== 'hard-stop' && t.id !== 'rest');
+    if (tasks.length === 0) { d = addDays(d, -1); continue; }
+    const hit = tasks.some(t => data.tasks[t.id]);
+    if (hit) { streak++; d = addDays(d, -1); }
+    else if (i === 0) { d = addDays(d, -1); }
+    else break;
+  }
+  return streak;
+}
+
+// =========================================================================
+// Exam date config — stored at config:ccna-exam-date as YYYY-MM-DD string.
+// =========================================================================
+async function getExamDate() {
+  try {
+    const r = await window.storage.get('config:ccna-exam-date');
+    if (r && r.value) return r.value;
+  } catch (e) {}
+  return null;
+}
+async function setExamDate(dateStr) {
+  if (dateStr) await window.storage.set('config:ccna-exam-date', dateStr);
+  else await window.storage.delete('config:ccna-exam-date');
+}
+
+async function renderExamCountdown() {
+  const el = document.getElementById('exam-countdown');
+  const btn = document.getElementById('set-exam-date');
+  const dateStr = await getExamDate();
+  if (!dateStr) {
+    el.textContent = 'CCNA exam: not set';
+    el.className = 'exam-countdown';
+    btn.textContent = 'Set exam date';
+    return;
+  }
+  const exam = parseDate(dateStr);
+  if (!exam) { el.textContent = 'CCNA exam: invalid date'; return; }
+  const diff = daysBetween(today, exam);
+  let cls = 'exam-countdown', label;
+  if (diff > 0) {
+    label = diff === 1 ? '1 day' : `${diff} days`;
+    el.innerHTML = `CCNA exam in <strong>${label}</strong>`;
+    if (diff <= 14) cls += ' urgent';
+  } else if (diff === 0) {
+    el.innerHTML = `CCNA exam: <strong>today</strong>`;
+    cls += ' urgent';
+  } else {
+    el.innerHTML = `CCNA exam: <strong>passed (${exam.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})</strong>`;
+    cls += ' passed';
+  }
+  el.className = cls;
+  btn.textContent = 'Change';
+}
+
+// =========================================================================
+// Domain freshness — scans all day:* keys, finds latest day each domain was tagged.
+// =========================================================================
+async function calcDomainFreshness() {
+  const result = {};
+  for (const dom of CCNA_DOMAINS) result[dom.id] = null;
+
+  let keys = [];
+  try {
+    const r = await window.storage.list('day:');
+    keys = (r && r.keys) ? r.keys.filter(k => k && k.startsWith('day:')) : [];
+  } catch (e) { return result; }
+
+  for (const key of keys) {
+    const dateStr = key.slice(4); // strip "day:"
+    const d = parseDate(dateStr);
+    if (!d) continue;
+    const data = await loadDay(dateStr);
+    if (!Array.isArray(data.topics) || data.topics.length === 0) continue;
+    for (const t of data.topics) {
+      if (!(t in result)) continue;
+      if (result[t] === null || d > result[t]) result[t] = d;
+    }
+  }
+  return result;
+}
+
+async function renderFreshness() {
+  const fresh = await calcDomainFreshness();
+  const hasAny = Object.values(fresh).some(v => v !== null);
+  const panel = document.getElementById('freshness');
+  const grid = document.getElementById('freshness-grid');
+  // Show panel as soon as the user has tagged anything, OR if we're in any CCNA-relevant phase.
+  const phase = getPhase(today);
+  const showPanel = hasAny || (phase >= 1 && phase <= 3);
+  if (!showPanel) { panel.hidden = true; return; }
+  panel.hidden = false;
+
+  grid.innerHTML = '';
+  for (const dom of CCNA_DOMAINS) {
+    const lastDate = fresh[dom.id];
+    let ageText, ageCls = 'fresh-age';
+    if (!lastDate) {
+      ageText = 'never';
+      ageCls += ' never';
+    } else {
+      const age = daysBetween(lastDate, today);
+      if (age === 0) ageText = 'today';
+      else if (age === 1) ageText = '1 day ago';
+      else ageText = `${age} days ago`;
+      if (age > STALE_DAYS) ageCls += ' stale';
+    }
+    const item = document.createElement('div');
+    item.className = 'fresh-item';
+    item.innerHTML = `<span class="fresh-name">${dom.name}</span><span class="${ageCls}">${ageText}</span>`;
+    grid.appendChild(item);
+  }
+}
+
+// =========================================================================
+// Skill review progress — per-skill lab-rebuild + recall checkboxes.
+// Stored in a single config key so it's separate from day data and rides
+// along with the existing config:* export/import whitelist automatically.
+// Shape: { "06": { rebuild: true, recall: false }, ... }
+// =========================================================================
+async function loadSkillProgress() {
+  try {
+    const r = await window.storage.get('config:skill-progress');
+    if (r && r.value) {
+      const parsed = JSON.parse(r.value);
+      if (parsed && typeof parsed === 'object') return parsed;
+    }
+  } catch (e) {}
+  return {};
+}
+
+async function saveSkillProgress(progress) {
+  try {
+    await window.storage.set('config:skill-progress', JSON.stringify(progress));
+    flashStatus('Saved ✓');
+  } catch (e) {
+    flashStatus('Save failed');
+    console.error(e);
+  }
+}
+
+// A skill counts as "done" when every checkbox it offers is checked:
+// lab skills need both rebuild + recall; recall-only skills need recall.
+function isSkillDone(skill, entry) {
+  if (!entry) return false;
+  if (skill.lab) return !!entry.rebuild && !!entry.recall;
+  return !!entry.recall;
+}
+
+async function renderSkills() {
+  const progress = await loadSkillProgress();
+  const list = document.getElementById('skills-list');
+  list.innerHTML = '';
+
+  for (const skill of CCNA_SKILLS) {
+    const entry = progress[skill.id] || {};
+    const done = isSkillDone(skill, entry);
+
+    const labCheckbox = skill.lab
+      ? `<label class="skill-check">
+           <input type="checkbox" data-skill="${skill.id}" data-kind="rebuild" ${entry.rebuild ? 'checked' : ''} aria-label="Lab rebuild for skill ${skill.id}">
+           rebuild
+         </label>`
+      : `<span class="skill-check placeholder" aria-hidden="true">
+           <input type="checkbox" disabled tabindex="-1"> rebuild
+         </span>`;
+
+    const item = document.createElement('div');
+    item.className = `skill-item ${done ? 'done' : ''}`;
+    item.innerHTML = `
+      <span class="skill-name"><span class="skill-num">${skill.id}</span>${escapeHtml(skill.name)}</span>
+      ${labCheckbox}
+      <label class="skill-check">
+        <input type="checkbox" data-skill="${skill.id}" data-kind="recall" ${entry.recall ? 'checked' : ''} aria-label="Recall self-test for skill ${skill.id}">
+        recall
+      </label>
+    `;
+    list.appendChild(item);
+  }
+
+  // Wire up the checkboxes.
+  list.querySelectorAll('input[type="checkbox"]:not([disabled])').forEach(cb => {
+    cb.addEventListener('change', async (e) => {
+      const id = e.target.dataset.skill;
+      const kind = e.target.dataset.kind;
+      const prog = await loadSkillProgress();
+      if (!prog[id]) prog[id] = {};
+      prog[id][kind] = e.target.checked;
+      await saveSkillProgress(prog);
+      renderSkills(); // re-render so the done-dimming updates
+    });
+  });
+}
+
+// =========================================================================
+// Notes search — scans all day:* keys, finds matches in notes field.
+// =========================================================================
+let searchDebounce;
+async function runSearch(query) {
+  const resultsEl = document.getElementById('search-results');
+  query = (query || '').trim().toLowerCase();
+  if (!query) { resultsEl.hidden = true; resultsEl.innerHTML = ''; return; }
+
+  let keys = [];
+  try {
+    const r = await window.storage.list('day:');
+    keys = (r && r.keys) ? r.keys.filter(k => k && k.startsWith('day:')) : [];
+  } catch (e) {}
+
+  const matches = [];
+  for (const key of keys) {
+    const dateStr = key.slice(4);
+    const data = await loadDay(dateStr);
+    if (!data.notes) continue;
+    const idx = data.notes.toLowerCase().indexOf(query);
+    if (idx === -1) continue;
+    matches.push({ dateStr, notes: data.notes, idx });
+  }
+  // Most recent first.
+  matches.sort((a, b) => b.dateStr.localeCompare(a.dateStr));
+
+  resultsEl.hidden = false;
+  if (matches.length === 0) {
+    resultsEl.innerHTML = `<div class="search-empty">No notes matching "${escapeHtml(query)}".</div>`;
+    return;
+  }
+
+  resultsEl.innerHTML = matches.map(m => {
+    const start = Math.max(0, m.idx - 30);
+    const end = Math.min(m.notes.length, m.idx + query.length + 60);
+    const before = (start > 0 ? '…' : '') + m.notes.slice(start, m.idx);
+    const hit = m.notes.slice(m.idx, m.idx + query.length);
+    const after = m.notes.slice(m.idx + query.length, end) + (end < m.notes.length ? '…' : '');
+    const d = parseDate(m.dateStr);
+    const dateLabel = d ? d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }) : m.dateStr;
+    return `<div class="search-result" data-date="${m.dateStr}">
+      <div class="search-result-date">${dateLabel}</div>
+      <div class="search-result-excerpt">${escapeHtml(before)}<mark>${escapeHtml(hit)}</mark>${escapeHtml(after)}</div>
+    </div>`;
+  }).join('');
+
+  document.querySelectorAll('.search-result').forEach(el => {
+    el.addEventListener('click', () => {
+      const d = parseDate(el.dataset.date);
+      if (d) {
+        currentWeekStart = getMonday(d);
+        document.getElementById('notes-search').value = '';
+        resultsEl.hidden = true;
+        resultsEl.innerHTML = '';
+        render();
+      }
+    });
+  });
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// =========================================================================
+// Export / Import — JSON backup of all keys.
+// =========================================================================
+async function exportData() {
+  const dump = {};
+  try {
+    const r = await window.storage.list();
+    const keys = (r && r.keys) ? r.keys : [];
+    for (const k of keys) {
+      if (!k) continue;
+      if (k.startsWith('day:') || k.startsWith('config:')) {
+        const v = await window.storage.get(k);
+        if (v && typeof v.value !== 'undefined') dump[k] = v.value;
+      }
+    }
+  } catch (e) {
+    flashStatus('Export failed');
+    console.error(e);
+    return;
+  }
+  const blob = new Blob([JSON.stringify({ version: 1, exported: new Date().toISOString(), data: dump }, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `study-tracker-${fmtDate(today)}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  flashStatus('Exported ✓');
+}
+
+async function importData(file) {
+  if (!file) return;
+  try {
+    const text = await file.text();
+    const parsed = JSON.parse(text);
+    const data = parsed && parsed.data ? parsed.data : null;
+    if (!data || typeof data !== 'object') throw new Error('Invalid file format');
+    if (!confirm(`Import will overwrite any existing keys with the same name. ${Object.keys(data).length} keys to import. Continue?`)) return;
+    for (const [k, v] of Object.entries(data)) {
+      if (k.startsWith('day:') || k.startsWith('config:')) {
+        await window.storage.set(k, String(v));
+      }
+    }
+    flashStatus('Imported ✓');
+    render();
+  } catch (e) {
+    flashStatus('Import failed');
+    alert('Import failed: ' + e.message);
+    console.error(e);
+  }
+}
+
+// =========================================================================
+// Main render
+// =========================================================================
+async function render() {
+  const weekEnd = addDays(currentWeekStart, 6);
+  document.getElementById('week-display').textContent = fmtRange(currentWeekStart, weekEnd);
+
+  const phase = getPhase(currentWeekStart);
+  const p = PHASES[phase];
+  document.getElementById('phase-name').textContent = p.name;
+  document.getElementById('phase-focus').textContent = p.focus;
+  document.getElementById('phase-dates').textContent = p.dates;
+
+  await renderExamCountdown();
+
+  const daysEl = document.getElementById('days');
+  daysEl.innerHTML = '';
+
+  let totalTasks = 0, totalGaming = 0, daysHit = 0, weekStudyTaskSlots = 0;
+
+  for (let i = 0; i < 7; i++) {
+    const d = addDays(currentWeekStart, i);
+    const dateStr = fmtDate(d);
+    const data = await loadDay(dateStr);
+    const tasks = getTasks(d);
+    const isToday = fmtDate(today) === dateStr;
+    const studyTasks = tasks.filter(t => t.id !== 'hard-stop' && t.id !== 'rest');
+    const completed = studyTasks.filter(t => data.tasks[t.id]).length;
+    const dayComplete = studyTasks.length > 0 && completed === studyTasks.length;
+    if (dayComplete) daysHit++;
+    totalTasks += completed;
+    weekStudyTaskSlots += studyTasks.length;
+    totalGaming += data.gamingMinutes || 0;
+
+    // Yesterday's retrieval prompt (if any) — show as a quiz card at the top of today's body.
+    const prevDate = fmtDate(addDays(d, -1));
+    const prevData = await loadDay(prevDate);
+    const prevPrompt = (prevData.retrievalPrompt || '').trim();
+
+    // Decide whether to show the domain selector — only on days with CCNA study tasks.
+    const hasCcna = tasks.some(t => t.isCcnaStudy);
+
+    const card = document.createElement('div');
+    card.className = `day ${isToday ? 'today' : ''} ${dayComplete ? 'complete' : ''}`;
+    card.innerHTML = `
+      <div class="day-header">
+        <div class="day-title">
+          <div class="day-name">${DAY_NAMES[d.getDay()]}</div>
+          <div class="day-date">${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
+          ${isToday ? '<span class="today-pill">Today</span>' : ''}
+        </div>
+        <div class="day-status ${dayComplete ? 'complete' : ''}">${dayComplete ? '✓ done' : `${completed}/${studyTasks.length}`}</div>
+      </div>
+      <div class="day-body">
+        ${prevPrompt ? `
+          <div class="retrieval-quiz">
+            <div class="retrieval-quiz-label">Quiz from yesterday — try before opening notes</div>
+            <div class="retrieval-quiz-text">${escapeHtml(prevPrompt)}</div>
+          </div>` : ''}
+        <ul class="task-list">
+          ${tasks.map(t => `
+            <li class="task">
+              <input type="checkbox" id="t-${dateStr}-${t.id}" ${data.tasks[t.id] ? 'checked' : ''} data-date="${dateStr}" data-task="${t.id}">
+              <label for="t-${dateStr}-${t.id}" class="task-label">${escapeHtml(t.label)}</label>
+              <span class="tag ${t.cls}">${t.tag}</span>
+            </li>`).join('')}
+        </ul>
+        ${hasCcna ? `
+          <div class="domain-select-row">
+            <span class="field-label">CCNA domain</span>
+            <select class="domain-select" data-date="${dateStr}" aria-label="CCNA domain covered today">
+              <option value="">— pick the domain you covered —</option>
+              ${CCNA_DOMAINS.map(dom => `<option value="${dom.id}" ${data.topics.includes(dom.id) ? 'selected' : ''}>${dom.name} (${dom.weight})</option>`).join('')}
+            </select>
+          </div>` : ''}
+        <div class="extras">
+          <div>
+            <span class="field-label">Gaming</span>
+            <div class="gaming-control">
+              <button class="gaming-btn" data-date="${dateStr}" data-delta="-30" aria-label="Subtract 30 minutes">−</button>
+              <span class="gaming-display ${(data.gamingMinutes || 0) > 60 ? 'warn' : ''}" id="g-${dateStr}">${formatMinutes(data.gamingMinutes || 0)}</span>
+              <button class="gaming-btn" data-date="${dateStr}" data-delta="30" aria-label="Add 30 minutes">+</button>
+            </div>
+          </div>
+          <div>
+            <span class="field-label">Notes</span>
+            <textarea class="notes-input" data-date="${dateStr}" placeholder="What worked, what didn't, what's next…" rows="1">${escapeHtml(data.notes || '')}</textarea>
+          </div>
+        </div>
+        <div class="retrieval-prompt-row">
+          <span class="field-label">One thing to quiz me on tomorrow</span>
+          <input type="text" class="retrieval-prompt-input" data-date="${dateStr}" placeholder="e.g. OSPF neighbor states in order" value="${escapeHtml(data.retrievalPrompt || '')}">
+        </div>
+      </div>
+    `;
+    daysEl.appendChild(card);
+  }
+
+  document.getElementById('stat-tasks').innerHTML = `${totalTasks}<span class="stat-unit">/${weekStudyTaskSlots}</span>`;
+  document.getElementById('stat-gaming').innerHTML = `${(totalGaming / 60).toFixed(1)}<span class="stat-unit">hrs</span>`;
+  document.getElementById('stat-days').innerHTML = `${daysHit}<span class="stat-unit">/7</span>`;
+  const streak = await calcStreak();
+  document.getElementById('stat-streak').innerHTML = `${streak}<span class="stat-unit">${streak === 1 ? 'day' : 'days'}</span>`;
+
+  await renderFreshness();
+  await renderSkills();
+  attachListeners();
+}
+
+// =========================================================================
+// Listeners
+// =========================================================================
+function attachListeners() {
+  document.querySelectorAll('.task input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener('change', async (e) => {
+      const data = await loadDay(e.target.dataset.date);
+      data.tasks[e.target.dataset.task] = e.target.checked;
+      await saveDay(e.target.dataset.date, data);
+      render();
+    });
+  });
+  document.querySelectorAll('.gaming-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const date = e.currentTarget.dataset.date;
+      const delta = parseInt(e.currentTarget.dataset.delta);
+      const data = await loadDay(date);
+      data.gamingMinutes = Math.max(0, (data.gamingMinutes || 0) + delta);
+      document.getElementById(`g-${date}`).textContent = formatMinutes(data.gamingMinutes);
+      document.getElementById(`g-${date}`).className = `gaming-display ${data.gamingMinutes > 60 ? 'warn' : ''}`;
+      await saveDay(date, data);
+      // Update gaming total only (no full re-render).
+      let totalGaming = 0;
+      for (let i = 0; i < 7; i++) {
+        const dd = await loadDay(fmtDate(addDays(currentWeekStart, i)));
+        totalGaming += dd.gamingMinutes || 0;
+      }
+      document.getElementById('stat-gaming').innerHTML = `${(totalGaming / 60).toFixed(1)}<span class="stat-unit">hrs</span>`;
+    });
+  });
+  document.querySelectorAll('.notes-input').forEach(input => {
+    let t;
+    input.addEventListener('input', (e) => {
+      clearTimeout(t);
+      t = setTimeout(async () => {
+        const data = await loadDay(e.target.dataset.date);
+        data.notes = e.target.value;
+        await saveDay(e.target.dataset.date, data);
+      }, 500);
+    });
+  });
+  document.querySelectorAll('.domain-select').forEach(sel => {
+    sel.addEventListener('change', async (e) => {
+      const date = e.target.dataset.date;
+      const val = e.target.value;
+      const data = await loadDay(date);
+      data.topics = val ? [val] : [];
+      await saveDay(date, data);
+      // Re-render freshness only (no need to rebuild the whole week).
+      renderFreshness();
+    });
+  });
+  document.querySelectorAll('.retrieval-prompt-input').forEach(input => {
+    let t;
+    input.addEventListener('input', (e) => {
+      clearTimeout(t);
+      t = setTimeout(async () => {
+        const data = await loadDay(e.target.dataset.date);
+        data.retrievalPrompt = e.target.value;
+        await saveDay(e.target.dataset.date, data);
+      }, 500);
+    });
+  });
+}
+
+// Week navigation.
+document.getElementById('prev-week').addEventListener('click', () => { currentWeekStart = addDays(currentWeekStart, -7); render(); });
+document.getElementById('next-week').addEventListener('click', () => { currentWeekStart = addDays(currentWeekStart, 7); render(); });
+document.getElementById('today-btn').addEventListener('click', () => { currentWeekStart = getMonday(today); render(); });
+document.getElementById('reset-week').addEventListener('click', async () => {
+  if (!confirm('Reset all data for this week? This cannot be undone.')) return;
+  for (let i = 0; i < 7; i++) {
+    const dateStr = fmtDate(addDays(currentWeekStart, i));
+    try { await window.storage.delete(`day:${dateStr}`); } catch (e) {}
+  }
+  render();
+});
+
+// Exam date modal.
+const examModal = document.getElementById('exam-modal');
+document.getElementById('set-exam-date').addEventListener('click', async () => {
+  const current = await getExamDate();
+  document.getElementById('exam-date-input').value = current || '';
+  examModal.showModal();
+});
+document.getElementById('exam-cancel').addEventListener('click', () => examModal.close());
+document.getElementById('exam-clear').addEventListener('click', async () => {
+  await setExamDate(null);
+  examModal.close();
+  renderExamCountdown();
+});
+document.getElementById('exam-save').addEventListener('click', async () => {
+  const val = document.getElementById('exam-date-input').value;
+  await setExamDate(val || null);
+  examModal.close();
+  renderExamCountdown();
+});
+
+// Notes search.
+document.getElementById('notes-search').addEventListener('input', (e) => {
+  clearTimeout(searchDebounce);
+  searchDebounce = setTimeout(() => runSearch(e.target.value), 200);
+});
+
+// Export / Import.
+document.getElementById('export-btn').addEventListener('click', exportData);
+document.getElementById('import-btn').addEventListener('click', () => document.getElementById('import-file').click());
+document.getElementById('import-file').addEventListener('change', (e) => {
+  const file = e.target.files && e.target.files[0];
+  importData(file);
+  e.target.value = ''; // allow re-import of same file
+});
+
+render();
+</script>
+</body>
+</html>
